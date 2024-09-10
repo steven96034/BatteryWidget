@@ -10,6 +10,7 @@ import android.os.SystemClock
 import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
@@ -51,15 +52,18 @@ class BatteryWidget : GlanceAppWidget() {
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val batteryInfo = getBatteryInfo(context)
 //        val isRunning = isAlarmRunning(context)
-        val isRunning = isAlarmRunning
+        val time = getTimeStamp()
 
         provideContent {
-            BatteryWidgetContent(batteryInfo)
+            BatteryWidgetContent(batteryInfo, time)
         }
     }
 
     @Composable
-    private fun BatteryWidgetContent(batteryInfo: BatteryInfo) {
+    private fun BatteryWidgetContent(batteryInfo: BatteryInfo, time: String) {
+
+        val textStyleBig = TextStyle(fontSize = 12.sp, color = ColorProvider(Color.White, Color.White))
+        val textStyleSmall = TextStyle(fontSize = 10.sp, color = ColorProvider(Color.White, Color.White))
 
         Row(
             modifier = GlanceModifier.fillMaxWidth().background(color = Color.DarkGray),
@@ -70,38 +74,37 @@ class BatteryWidget : GlanceAppWidget() {
             ) {
                 Text(
                     text = "Battery: ${batteryInfo.battery}%",
-                    style = TextStyle(fontSize = 12.sp,color = ColorProvider(Color.White, Color.White)),
+                    style = textStyleBig,
 //                    modifier = GlanceModifier.defaultWeight()
                 )
                 Text(
                     text = "RemainingT: ${batteryInfo.remainingTime} min",
-                    style = TextStyle(fontSize = 12.sp,color = ColorProvider(Color.White, Color.White))
+                    style = textStyleBig
                 )
                 Text(
                     text = "Current: ${batteryInfo.current} mA",
-                    style = TextStyle(fontSize = 12.sp,color = ColorProvider(Color.White, Color.White))
+                    style = textStyleBig
                 )
                 Text(
                     text = "Charging?: ${batteryInfo.status}",
-                    style = TextStyle(fontSize = 12.sp,color = ColorProvider(Color.White, Color.White))
+                    style = textStyleBig
                 )
                 Text(
-                    text = "UpdateTimes: ${Attempt.count}",
-                    style = TextStyle(fontSize = 10.sp,color = ColorProvider(Color.White, Color.White))
+                    text = "UpdateTimes: $count",
+                    style = textStyleSmall
                 )
-                val time = LocalDateTime.now()
-                val formatter = DateTimeFormatter.ofPattern("HH:mm:ss")
-                val formatted = time.format(formatter)
+
                 Text(
-                    text = "LastUpTime: $formatted",
-                    style = TextStyle(fontSize = 10.sp,color = ColorProvider(Color.White, Color.White))
+                    text = "LastUpTime: $time",
+                    style = textStyleSmall
                 )
             }
             Column (
                 modifier = GlanceModifier.fillMaxHeight().background(color = Color.LightGray),
-                verticalAlignment = Alignment.Top,
+                verticalAlignment = Alignment.CenterVertically,
                 horizontalAlignment = Alignment.End
             ) {
+                //Spacer(modifier = GlanceModifier.height(20.dp))
                 Image(
                     provider = ImageProvider(android.R.drawable.ic_menu_rotate),
                     contentDescription = "Refresh",
@@ -127,17 +130,42 @@ class BatteryWidget : GlanceAppWidget() {
         return BatteryInfo(battery, current, status, remainingTime / 1000 / 60)
     }
 
+    private fun getTimeStamp(): String {
+        val time = LocalDateTime.now()
+        val formatter = DateTimeFormatter.ofPattern("HH:mm:ss")
+        return time.format(formatter)
+    }
+
+    // **this way to check if is alarm running is not valid due to the intent may be always available, such that the return be always true**
 //    fun isAlarmRunning(context: Context): Boolean {
 //        val intent = Intent(context, UpdateBroadcastReceiver::class.java)
 //        return PendingIntent.getBroadcast(context, 0, intent,
 //            PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE) != null
 //    }
 
-    //private var isAlarmRunning by mutableStateOf(true)
-
     companion object {
         var isAlarmRunning by mutableStateOf(true)
+        var count by mutableIntStateOf(0)
     }
+
+    // **actionRunCallback<RefreshAction>() and actionRunCallback<ToggleAction>() need "Content" in Glance App Widget also some Glance functions,
+//      such that the "Action"s may fail to function resulting the failure of Preview, then we can't use "@Preview" to check if the layout works or not** //
+//    private val LocalBatteryInfo = compositionLocalOf<BatteryInfo> { error("No BatteryInfo provided") }
+//    class BatteryInfoProvider: PreviewParameterProvider<BatteryWidget.BatteryInfo> {
+//        override val values = sequenceOf(
+//            BatteryWidget.BatteryInfo(81, 1020, "Yes", 30)
+//        )
+//    }
+//    @Preview(showBackground = true)
+//    @Composable
+//    fun BatteryWidgetPreview(@PreviewParameter(BatteryInfoProvider::class) batteryInfo: BatteryInfo) {
+//        CompositionLocalProvider(LocalBatteryInfo provides batteryInfo,
+//            LocalSize provides DpSize(100.dp, 50.dp)) {
+//            BatteryWidgetContent(batteryInfo, "00:00:00")
+//        }
+//
+//    }
+
 }
 
 class BatteryWidgetReceiver : GlanceAppWidgetReceiver() {
@@ -150,8 +178,8 @@ class RefreshAction : ActionCallback {
         glanceId: GlanceId,
         parameters: ActionParameters
     ) {
-        Attempt.count++
-        Log.d("RRR", "RefreshAction!!!")
+        BatteryWidget.count++
+        Log.d("Refresh", "RefreshAction!!!")
         BatteryWidget().update(context, glanceId)
     }
 }
@@ -165,16 +193,16 @@ class ToggleAction : ActionCallback {
         //val isRunning = BatteryWidget().isAlarmRunning(context)
         if (BatteryWidget.isAlarmRunning) {
             cancelUpdate(context)
-            Log.d("TTT", "cancelUpdate!!!Before, ${BatteryWidget.isAlarmRunning}")
+            Log.d("Toggle", "cancelUpdate!!!Before, ${BatteryWidget.isAlarmRunning}")
             BatteryWidget.isAlarmRunning = !BatteryWidget.isAlarmRunning
-            Log.d("TTT", "cancelUpdate!!!After, ${BatteryWidget.isAlarmRunning}")
+            Log.d("Toggle", "cancelUpdate!!!After, ${BatteryWidget.isAlarmRunning}")
         } else {
             scheduleUpdate(context)
-            Log.d("TTT", "scheduledUpdate!!!Before, ${BatteryWidget.isAlarmRunning}")
+            Log.d("Toggle", "scheduledUpdate!!!Before, ${BatteryWidget.isAlarmRunning}")
             BatteryWidget.isAlarmRunning = !BatteryWidget.isAlarmRunning
-            Log.d("TTT", "scheduleUpdate!!!After, ${BatteryWidget.isAlarmRunning}")
+            Log.d("Toggle", "scheduleUpdate!!!After, ${BatteryWidget.isAlarmRunning}")
         }
-        Attempt.count++
+        BatteryWidget.count++
         BatteryWidget().update(context, glanceId)
     }
 }
@@ -207,9 +235,9 @@ private fun cancelUpdate(context: Context) {
         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
     )
     alarmManager.cancel(pendingIntent)
-    Log.d("AAA","ALARM HAS CANCELLED!")
+    Log.d("ALARM","ALARM HAS CANCELLED!")
 
-    // Toast出不來，還沒解決
+    // **can't function toast correctly (haven't solved yet)**
 //    Looper.prepare()
 //    Toast.makeText(context, "鬧鐘已取消", Toast.LENGTH_SHORT).show()
 //    Looper.loop()
@@ -220,16 +248,8 @@ class UpdateBroadcastReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         scope.launch {
-            Attempt.count++
+            BatteryWidget.count++
             BatteryWidget().updateAll(context)
         }
     }
-}
-
-object Attempt{
-    var count by mutableStateOf(0)
-
-//    val _count = MutableLiveData(0)
-//    val Count: Int by LiveData<Int>.hasObservers()
-//        //get() = _count
 }
