@@ -6,8 +6,11 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.os.BatteryManager
+import android.os.Handler
+import android.os.Looper
 import android.os.SystemClock
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -73,30 +76,36 @@ class BatteryWidget : GlanceAppWidget() {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "Battery: ${batteryInfo.battery}%",
+                    text = "Battery Percentage: ${batteryInfo.battery}%",
                     style = textStyleBig,
-//                    modifier = GlanceModifier.defaultWeight()
+                    modifier = GlanceModifier.defaultWeight()
                 )
                 Text(
-                    text = "RemainingT: ${batteryInfo.remainingTime} min",
-                    style = textStyleBig
+                    text = "Remaining Time: ${batteryInfo.remainingTime} min",
+                    style = textStyleBig,
+                    modifier = GlanceModifier.defaultWeight()
+
                 )
                 Text(
                     text = "Current: ${batteryInfo.current} mA",
-                    style = textStyleBig
+                    style = textStyleBig,
+                    modifier = GlanceModifier.defaultWeight()
                 )
                 Text(
                     text = "Charging?: ${batteryInfo.status}",
-                    style = textStyleBig
+                    style = textStyleBig,
+                    modifier = GlanceModifier.defaultWeight()
                 )
                 Text(
-                    text = "UpdateTimes: $count",
-                    style = textStyleSmall
+                    text = "Updated Times: $count",
+                    style = textStyleBig,
+                    modifier = GlanceModifier.defaultWeight()
                 )
 
                 Text(
-                    text = "LastUpTime: $time",
-                    style = textStyleSmall
+                    text = "Last Updated Time: $time",
+                    style = textStyleSmall,
+                    modifier = GlanceModifier.defaultWeight()
                 )
             }
             Column (
@@ -104,16 +113,16 @@ class BatteryWidget : GlanceAppWidget() {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalAlignment = Alignment.End
             ) {
-                //Spacer(modifier = GlanceModifier.height(20.dp))
+
                 Image(
                     provider = ImageProvider(android.R.drawable.ic_menu_rotate),
                     contentDescription = "Refresh",
-                    modifier = GlanceModifier.clickable(actionRunCallback<RefreshAction>())
+                    modifier = GlanceModifier.clickable(actionRunCallback<RefreshAction>()).defaultWeight()
                 )
                 Image(
                     provider = ImageProvider(if (isAlarmRunning) android.R.drawable.ic_media_pause else android.R.drawable.ic_media_play),
                     contentDescription = if (isAlarmRunning) "Stop" else "Start",
-                    modifier = GlanceModifier.clickable(actionRunCallback<ToggleAction>())
+                    modifier = GlanceModifier.clickable(actionRunCallback<ToggleAction>()).defaultWeight()
                 )
             }
 
@@ -181,6 +190,10 @@ class RefreshAction : ActionCallback {
         BatteryWidget.count++
         Log.d("Refresh", "RefreshAction!!!")
         BatteryWidget().update(context, glanceId)
+        val handler = Handler(Looper.getMainLooper())
+        handler.post{
+            Toast.makeText(context, "Data has updated manually.", Toast.LENGTH_SHORT).show()
+        }
     }
 }
 
@@ -207,6 +220,7 @@ class ToggleAction : ActionCallback {
     }
 }
 
+
 private fun scheduleUpdate(context: Context) {
     val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
     val intent = Intent(context, UpdateBroadcastReceiver::class.java)
@@ -223,6 +237,11 @@ private fun scheduleUpdate(context: Context) {
         60000,
         pendingIntent
     )
+
+    val handler = Handler(Looper.getMainLooper())
+    handler.post{
+        Toast.makeText(context, "Alarm has scheduled.", Toast.LENGTH_SHORT).show()
+    }
 }
 
 private fun cancelUpdate(context: Context) {
@@ -237,10 +256,16 @@ private fun cancelUpdate(context: Context) {
     alarmManager.cancel(pendingIntent)
     Log.d("ALARM","ALARM HAS CANCELLED!")
 
-    // **can't function toast correctly (haven't solved yet)**
-//    Looper.prepare()
-//    Toast.makeText(context, "鬧鐘已取消", Toast.LENGTH_SHORT).show()
-//    Looper.loop()
+
+    // **need to guide users to turn on the notification permission if using Toast to manifest some message,
+        // also os may adjust the frequency of rapidly function the Toast message in order to improve the user experience,
+    // however, even that "Snackbar" doesn't need the permission, "Snackbar" cannot be used in widget but only in APP(with Activity Context)**
+    val handler = Handler(Looper.getMainLooper())
+    handler.post{
+        Toast.makeText(context, "Alarm has cancelled.", Toast.LENGTH_SHORT).show()
+    }
+
+
 }
 
 class UpdateBroadcastReceiver : BroadcastReceiver() {
