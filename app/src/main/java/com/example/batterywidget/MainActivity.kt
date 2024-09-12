@@ -34,6 +34,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.glance.color.colorProviders
 import com.example.batterywidget.ui.theme.BatteryWidgetTheme
 
 class MainActivity : ComponentActivity() {
@@ -41,7 +42,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             BatteryWidgetTheme {
-                // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
@@ -54,19 +54,23 @@ class MainActivity : ComponentActivity() {
 
     }
 
-
+    // Check if notification permission is granted when the app is launched.
     @Composable
     private fun CheckNotificationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(this,
-                    android.Manifest.permission.POST_NOTIFICATIONS) !=
-                android.content.pm.PackageManager.PERMISSION_GRANTED) {
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    android.Manifest.permission.POST_NOTIFICATIONS
+                ) !=
+                android.content.pm.PackageManager.PERMISSION_GRANTED
+            ) {
                 ShowNotificationPermissionDialog()
             }
         }
     }
 
 
+    // Show dialog to request notification permission.
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     private fun ShowNotificationPermissionDialog() {
@@ -75,9 +79,12 @@ class MainActivity : ComponentActivity() {
             BasicAlertDialog(onDismissRequest = {
             }) {
                 Surface(
-                    modifier = Modifier. wrapContentWidth().wrapContentHeight(),
-                    shape = MaterialTheme. shapes. large,
-                    tonalElevation = AlertDialogDefaults. TonalElevation) {
+                    modifier = Modifier
+                        .wrapContentWidth()
+                        .wrapContentHeight(),
+                    shape = MaterialTheme.shapes.large,
+                    tonalElevation = AlertDialogDefaults.TonalElevation
+                ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Row {
                             Column(modifier = Modifier.align(Alignment.CenterVertically)) {
@@ -101,7 +108,7 @@ class MainActivity : ComponentActivity() {
                         )
                         Text(
                             text = "To provide toast messages from widget, could you permit to receive notifications?",
-                            style = MaterialTheme. typography.bodyLarge
+                            style = MaterialTheme.typography.bodyLarge
                         )
                         Spacer(
                             modifier = Modifier.height(24.dp)
@@ -112,7 +119,7 @@ class MainActivity : ComponentActivity() {
                                     requestNotificationPermission()
                                     shouldShowDialog.value = false
                                 }
-                        ){ Text("Confirm") }
+                            ) { Text("Confirm") }
                             Spacer(
                                 modifier = Modifier.width(60.dp)
                             )
@@ -126,23 +133,26 @@ class MainActivity : ComponentActivity() {
                                 Text("Dismiss")
                             }
                         }
-
                     }
                 }
             }
         }
     }
 
+    // Request notification permission.
     private fun requestNotificationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             requestPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
         }
     }
 
-    private val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()
+    // Manifest notification permission if granted.
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
         if (isGranted) {
-            Toast.makeText(this, "Notification permission has been granted.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Notification permission has been granted.", Toast.LENGTH_SHORT)
+                .show()
         } else {
             // Do not manifest anything.
             // Or use some snackbar to manifest some messages.
@@ -150,12 +160,11 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-
-
+// View of application
 @Composable
 fun Greeting() {
-    Row {
-        Column(modifier = Modifier.align(alignment = Alignment.CenterVertically)) {
+    Row(modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.align(alignment = Alignment.CenterVertically).padding(10.dp)) {
             Text(
                 text = "Haven't implement settings here.",
                 modifier = Modifier.align(alignment = Alignment.CenterHorizontally),
@@ -165,7 +174,8 @@ fun Greeting() {
             Text(
                 text = "Back to homepage and enjoy the widget!",
                 modifier = Modifier.align(alignment = Alignment.CenterHorizontally),
-                style = MaterialTheme.typography.bodyLarge
+                style = MaterialTheme.typography.bodyLarge,
+                color = Color.LightGray
             )
         }
     }
