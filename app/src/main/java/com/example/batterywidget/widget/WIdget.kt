@@ -4,8 +4,8 @@ import android.content.Context
 import android.os.BatteryManager
 import android.util.Log
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
@@ -36,6 +36,8 @@ import java.time.format.DateTimeFormatter
 // Main Widget Class
 class BatteryWidget : GlanceAppWidget() {
 
+    private lateinit var settingDataStore: SettingDataStore
+
     data class BatteryInfo(
         val battery: Int,
         val current: Int,
@@ -48,14 +50,18 @@ class BatteryWidget : GlanceAppWidget() {
 //        val isRunning = isAlarmRunning(context)
         val time = getTimeStamp()
 
+
         provideContent {
-            BatteryWidgetContent(batteryInfo, time)
+            val updatedTimes by settingDataStore.countUpdateFlow.collectAsState(initial = 0)
+            Log.d("updatedTimes", "$updatedTimes")
+
+            BatteryWidgetContent(batteryInfo, time, updatedTimes)
         }
     }
 
     // View of Widget
     @Composable
-    private fun BatteryWidgetContent(batteryInfo: BatteryInfo, time: String) {
+    private fun BatteryWidgetContent(batteryInfo: BatteryInfo, time: String, updatedTimes: Int) {
 
         val textStyleBig =
             TextStyle(fontSize = 12.sp, color = ColorProvider(Color.White, Color.White))
@@ -91,7 +97,7 @@ class BatteryWidget : GlanceAppWidget() {
                     modifier = GlanceModifier.defaultWeight()
                 )
                 Text(
-                    text = "Updated Times: $count",
+                    text = "Updated Times: $updatedTimes",
                     style = textStyleBig,
                     modifier = GlanceModifier.defaultWeight()
                 )
@@ -151,7 +157,8 @@ class BatteryWidget : GlanceAppWidget() {
         // Not a @Composable function/object, so "remember" can't be used to trace data.
     companion object {
         var isAlarmRunning by mutableStateOf(true)
-        var count by mutableIntStateOf(0)
+        //var count by mutableIntStateOf(0)
+
     }
 
     // **actionRunCallback<RefreshAction>() and actionRunCallback<ToggleAction>() need "Content" in Glance App Widget also some Glance functions,

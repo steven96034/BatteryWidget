@@ -34,7 +34,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
-import androidx.glance.color.colorProviders
 import com.example.batterywidget.ui.theme.BatteryWidgetTheme
 
 class MainActivity : ComponentActivity() {

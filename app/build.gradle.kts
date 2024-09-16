@@ -61,7 +61,7 @@ dependencies {
     implementation("androidx.compose.material3:material3")
     implementation ("androidx.glance:glance:1.1.0")
     implementation ("androidx.glance:glance-appwidget:1.1.0")
-    implementation ("androidx.datastore:datastore-preferences:1.1.1")
+    implementation("androidx.datastore:datastore-preferences-core:1.1.1")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.5")
     implementation("androidx.glance:glance-material3:1.1.0")
     implementation("androidx.test.espresso:espresso-core:3.6.1")
