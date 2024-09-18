@@ -6,8 +6,6 @@ import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -15,6 +13,8 @@ import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.Image
 import androidx.glance.ImageProvider
+import androidx.glance.action.ActionParameters
+import androidx.glance.action.actionParametersOf
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.action.actionRunCallback
@@ -38,6 +38,7 @@ class BatteryWidget : GlanceAppWidget() {
 
     private lateinit var settingDataStore: SettingDataStore
 
+
     data class BatteryInfo(
         val battery: Int,
         val current: Int,
@@ -49,19 +50,20 @@ class BatteryWidget : GlanceAppWidget() {
         val batteryInfo = getBatteryInfo(context)
 //        val isRunning = isAlarmRunning(context)
         val time = getTimeStamp()
-
+        settingDataStore = SettingDataStore(context)
 
         provideContent {
-            val updatedTimes by settingDataStore.countUpdateFlow.collectAsState(initial = 0)
+            val updatedTimes by settingDataStore.countUpdateFlow.collectAsState(0)
+            val isRunning by settingDataStore.isAlarmRunningFlow.collectAsState(true)
             Log.d("updatedTimes", "$updatedTimes")
 
-            BatteryWidgetContent(batteryInfo, time, updatedTimes)
+            BatteryWidgetContent(batteryInfo, time, updatedTimes, isRunning)
         }
     }
 
     // View of Widget
     @Composable
-    private fun BatteryWidgetContent(batteryInfo: BatteryInfo, time: String, updatedTimes: Int) {
+    private fun BatteryWidgetContent(batteryInfo: BatteryInfo, time: String, updatedTimes: Int, isRunning: Boolean) {
 
         val textStyleBig =
             TextStyle(fontSize = 12.sp, color = ColorProvider(Color.White, Color.White))
@@ -84,7 +86,6 @@ class BatteryWidget : GlanceAppWidget() {
                     text = "Remaining Time: ${batteryInfo.remainingTime} min",
                     style = textStyleBig,
                     modifier = GlanceModifier.defaultWeight()
-
                 )
                 Text(
                     text = "Current: ${batteryInfo.current} mA",
@@ -119,15 +120,15 @@ class BatteryWidget : GlanceAppWidget() {
                         .defaultWeight()
                 )
                 Image(
-                    provider = ImageProvider(if (isAlarmRunning) android.R.drawable.ic_media_pause else android.R.drawable.ic_media_play),
-                    contentDescription = if (isAlarmRunning) "Stop" else "Start",
-                    modifier = GlanceModifier.clickable(actionRunCallback<ToggleAction>())
+                    provider = ImageProvider(if (isRunning) android.R.drawable.ic_media_pause else android.R.drawable.ic_media_play),
+                    contentDescription = if (isRunning) "Stop" else "Start",
+                    modifier = GlanceModifier.clickable(actionRunCallback<ToggleAction>(
+                        parameters = actionParametersOf(ActionParameters.Key<Boolean>("isRunning") to isRunning)))
                         .defaultWeight()
                 )
             }
-
         }
-        Log.d("UI", "After UI Updated, $isAlarmRunning")
+        Log.d("UI", "After UI Updated, $isRunning")
     }
 
     private fun getBatteryInfo(context: Context): BatteryInfo {
@@ -155,11 +156,11 @@ class BatteryWidget : GlanceAppWidget() {
 
     // Record state of alarm and count the times of update.
         // Not a @Composable function/object, so "remember" can't be used to trace data.
-    companion object {
-        var isAlarmRunning by mutableStateOf(true)
-        //var count by mutableIntStateOf(0)
-
-    }
+//    companion object {
+//        var isAlarmRunning by mutableStateOf(true)
+//        //var count by mutableIntStateOf(0)
+//
+//    }
 
     // **actionRunCallback<RefreshAction>() and actionRunCallback<ToggleAction>() need "Content" in Glance App Widget also some Glance functions,
     //      such that the "Action"s may fail to function resulting the failure of Preview, then we can't use "@Preview" to check if the layout works or not.** //

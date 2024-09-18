@@ -3,6 +3,7 @@ package com.example.batterywidget.widget
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -16,6 +17,7 @@ class SettingDataStore(context: Context) {
 
     private object Key{
         val updateTimesCounter = intPreferencesKey("updateTimes")
+        val isAlarmRunningCounter = booleanPreferencesKey("isAlarmRunning")
     }
     // For updateTimes
 //    suspend fun saveUpdatedTimes(context: Context, times: Int) {
@@ -36,4 +38,17 @@ class SettingDataStore(context: Context) {
         }
     }
 
+
+    // For isAlarmRunning
+    val isAlarmRunningFlow: Flow<Boolean> = context.dataStore.data
+        .map { preferences ->
+            preferences[Key.isAlarmRunningCounter] ?: true
+        }
+
+    suspend fun inverseIsAlarmRunning(context: Context) {
+        context.dataStore.edit { preferences ->
+            val currentPref = preferences[Key.isAlarmRunningCounter] ?: true
+            preferences[Key.isAlarmRunningCounter] = !currentPref
+        }
+    }
 }

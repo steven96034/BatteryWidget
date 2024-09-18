@@ -44,16 +44,22 @@ class ToggleAction : ActionCallback {
         parameters: ActionParameters
     ) {
         //val isRunning = BatteryWidget().isAlarmRunning(context)
-        if (BatteryWidget.isAlarmRunning) {
+        val isRunning = parameters[ActionParameters.Key<Boolean>("isRunning")]
+        val settingDataStore = SettingDataStore(context)
+
+
+        if (isRunning == true) {
             cancelUpdate(context)
-            Log.d("Toggle", "cancelUpdate!!!Before, ${BatteryWidget.isAlarmRunning}")
-            BatteryWidget.isAlarmRunning = !BatteryWidget.isAlarmRunning
-            Log.d("Toggle", "cancelUpdate!!!After, ${BatteryWidget.isAlarmRunning}")
+            Log.d("Toggle", "cancelUpdate!!!Before, $isRunning")
+            settingDataStore.inverseIsAlarmRunning(context)
+            //isAlarmRunning = !isAlarmRunning
+            Log.d("Toggle", "cancelUpdate!!!After, $isRunning")
         } else {
             scheduleUpdate(context)
-            Log.d("Toggle", "scheduledUpdate!!!Before, ${BatteryWidget.isAlarmRunning}")
-            BatteryWidget.isAlarmRunning = !BatteryWidget.isAlarmRunning
-            Log.d("Toggle", "scheduleUpdate!!!After, ${BatteryWidget.isAlarmRunning}")
+            Log.d("Toggle", "scheduledUpdate!!!Before, $isRunning")
+            settingDataStore.inverseIsAlarmRunning(context)
+            //isAlarmRunning = !isAlarmRunning
+            Log.d("Toggle", "scheduleUpdate!!!After, $isRunning")
         }
         //BatteryWidget.count++
         incrementCount(context)
