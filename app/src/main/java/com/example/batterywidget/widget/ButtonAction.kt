@@ -17,7 +17,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
-// Refresh Action for button.
+/**
+ * Refresh Action for button.
+ */
 class RefreshAction : ActionCallback {
     override suspend fun onAction(
         context: Context,
@@ -36,32 +38,30 @@ class RefreshAction : ActionCallback {
     }
 }
 
-// Toggle Action for button.
+/**
+ * Toggle Action for button.
+ */
 class ToggleAction : ActionCallback {
     override suspend fun onAction(
         context: Context,
         glanceId: GlanceId,
         parameters: ActionParameters
     ) {
-        //val isRunning = BatteryWidget().isAlarmRunning(context)
         val isRunning = parameters[ActionParameters.Key<Boolean>("isRunning")]
         val settingDataStore = SettingDataStore(context)
-
 
         if (isRunning == true) {
             cancelUpdate(context)
             Log.d("Toggle", "cancelUpdate!!!Before, $isRunning")
             settingDataStore.inverseIsAlarmRunning(context)
-            //isAlarmRunning = !isAlarmRunning
             Log.d("Toggle", "cancelUpdate!!!After, $isRunning")
         } else {
             scheduleUpdate(context)
             Log.d("Toggle", "scheduledUpdate!!!Before, $isRunning")
             settingDataStore.inverseIsAlarmRunning(context)
-            //isAlarmRunning = !isAlarmRunning
             Log.d("Toggle", "scheduleUpdate!!!After, $isRunning")
         }
-        //BatteryWidget.count++
+
         incrementCount(context)
 
         BatteryWidget().update(context, glanceId)
@@ -114,9 +114,11 @@ private fun cancelUpdate(context: Context) {
     Log.d("ALARM", "ALARM HAS CANCELLED!")
 
 
-    // **Need to guide users to turn on the notification permission if using Toast to manifest some message,
-    //      also os may adjust the frequency of rapidly function the Toast message in order to improve the user experience.
-    //   However, even that "Snackbar" doesn't need the permission, "Snackbar" cannot be used in widget but only in APP(with Activity Context).**
+    /**
+     * Need to guide users to turn on the notification permission if using Toast to manifest some message,
+     * also os may adjust the frequency of rapidly function the Toast message in order to improve the user experience.
+     * However, even that "Snackbar" doesn't need the permission, "Snackbar" cannot be used in widget but only in APP(with Activity Context).
+     */
     val handler = Handler(Looper.getMainLooper())
     handler.post {
         Toast.makeText(context, "Alarm has cancelled.", Toast.LENGTH_SHORT).show()

@@ -35,9 +35,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.example.batterywidget.ui.theme.BatteryWidgetTheme
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        installSplashScreen()
         super.onCreate(savedInstanceState)
         setContent {
             BatteryWidgetTheme {
@@ -53,7 +55,9 @@ class MainActivity : ComponentActivity() {
 
     }
 
-    // Check if notification permission is granted when the app is launched.
+    /**
+     * Check if notification permission is granted when the app is launched.
+    */
     @Composable
     private fun CheckNotificationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -69,7 +73,9 @@ class MainActivity : ComponentActivity() {
     }
 
 
-    // Show dialog to request notification permission.
+    /**
+     * Show dialog to request notification permission.
+     */
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     private fun ShowNotificationPermissionDialog() {
@@ -138,14 +144,18 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    // Request notification permission.
+    /**
+     * Request notification permission.
+     */
     private fun requestNotificationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             requestPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
         }
     }
 
-    // Manifest notification permission if granted.
+    /**
+     * Manifest notification permission if granted.
+     */
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
@@ -159,7 +169,9 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-// View of application
+/**
+ * View of application
+ */
 @Composable
 fun Greeting() {
     Row(modifier = Modifier.padding(16.dp)) {

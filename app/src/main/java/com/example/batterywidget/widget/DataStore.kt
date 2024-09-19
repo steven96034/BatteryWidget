@@ -19,7 +19,10 @@ class SettingDataStore(context: Context) {
         val updateTimesCounter = intPreferencesKey("updateTimes")
         val isAlarmRunningCounter = booleanPreferencesKey("isAlarmRunning")
     }
-    // For updateTimes
+
+    /**
+     * For updateTimes.
+     */
 //    suspend fun saveUpdatedTimes(context: Context, times: Int) {
 //        context.dataStore.edit { preferences ->
 //            preferences[Key.updateTimesCounter] = times
@@ -39,7 +42,9 @@ class SettingDataStore(context: Context) {
     }
 
 
-    // For isAlarmRunning
+    /**
+     * For isAlarmRunning.
+     */
     val isAlarmRunningFlow: Flow<Boolean> = context.dataStore.data
         .map { preferences ->
             preferences[Key.isAlarmRunningCounter] ?: true

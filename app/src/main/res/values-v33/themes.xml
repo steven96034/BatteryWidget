@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- For SplashScreen (Launch Screen) -->
+
     <style name="Theme.App.Starting" parent="Theme.SplashScreen">
         <!-- Set Background -->
         <item name="windowSplashScreenBackground">@color/black</item>
@@ -11,6 +11,8 @@
 
         <!-- Set Animation Time -->
         <item name="windowSplashScreenAnimationDuration">3000</item>
+
+        <item name="android:windowSplashScreenBehavior">icon_preferred</item>
 
         <!-- Set Theme After Starting -->
         <item name="postSplashScreenTheme">@style/Theme.BatteryWidget</item>

@@ -15,6 +15,7 @@ import androidx.glance.Image
 import androidx.glance.ImageProvider
 import androidx.glance.action.ActionParameters
 import androidx.glance.action.actionParametersOf
+import androidx.glance.action.actionStartActivity
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.action.actionRunCallback
@@ -29,11 +30,14 @@ import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.padding
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
+import com.example.batterywidget.MainActivity
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 
-// Main Widget Class
+/**
+ * Main Widget Class
+ */
 class BatteryWidget : GlanceAppWidget() {
 
     private lateinit var settingDataStore: SettingDataStore
@@ -48,7 +52,6 @@ class BatteryWidget : GlanceAppWidget() {
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val batteryInfo = getBatteryInfo(context)
-//        val isRunning = isAlarmRunning(context)
         val time = getTimeStamp()
         settingDataStore = SettingDataStore(context)
 
@@ -61,7 +64,9 @@ class BatteryWidget : GlanceAppWidget() {
         }
     }
 
-    // View of Widget
+    /**
+     * View of Widget
+     */
     @Composable
     private fun BatteryWidgetContent(batteryInfo: BatteryInfo, time: String, updatedTimes: Int, isRunning: Boolean) {
 
@@ -71,10 +76,12 @@ class BatteryWidget : GlanceAppWidget() {
             TextStyle(fontSize = 10.sp, color = ColorProvider(Color.White, Color.White))
 
         Row(
-            modifier = GlanceModifier.fillMaxWidth().background(color = Color.DarkGray),
+            modifier = GlanceModifier.fillMaxWidth().background(color = Color.DarkGray)
         ) {
             Column(
-                modifier = GlanceModifier.padding(8.dp),
+                modifier = GlanceModifier.padding(8.dp).clickable(
+                    actionStartActivity<MainActivity>()
+                ),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
@@ -147,23 +154,29 @@ class BatteryWidget : GlanceAppWidget() {
         return time.format(formatter)
     }
 
-    // **This way to check if is alarm running is not valid due to the intent may be always available, such that the return is always true.**
+    /**
+     * This way to check if is alarm running is not valid due to the intent may be always available, such that the return is always true.
+     */
 //    fun isAlarmRunning(context: Context): Boolean {
 //        val intent = Intent(context, UpdateBroadcastReceiver::class.java)
 //        return PendingIntent.getBroadcast(context, 0, intent,
 //            PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE) != null
 //    }
 
-    // Record state of alarm and count the times of update.
-        // Not a @Composable function/object, so "remember" can't be used to trace data.
+     /**
+      * Record state of alarm and count the times of update.
+      * Not a @Composable function/object, so "remember" can't be used to trace data.
+      */
 //    companion object {
 //        var isAlarmRunning by mutableStateOf(true)
 //        //var count by mutableIntStateOf(0)
 //
 //    }
 
-    // **actionRunCallback<RefreshAction>() and actionRunCallback<ToggleAction>() need "Content" in Glance App Widget also some Glance functions,
-    //      such that the "Action"s may fail to function resulting the failure of Preview, then we can't use "@Preview" to check if the layout works or not.** //
+    /**
+     * actionRunCallback<RefreshAction>() and actionRunCallback<ToggleAction>() need "Content" in Glance App Widget also some Glance functions,
+     * such that the "Action"s may fail to function resulting the failure of Preview, then we can't use "@Preview" to check if the layout works or not.
+     */
 //    private val LocalBatteryInfo = compositionLocalOf<BatteryInfo> { error("No BatteryInfo provided") }
 //    class BatteryInfoProvider: PreviewParameterProvider<BatteryWidget.BatteryInfo> {
 //        override val values = sequenceOf(
