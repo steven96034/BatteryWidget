@@ -47,7 +47,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Greeting()
+                    MainPageContent().Content()
                 }
             }
             CheckNotificationPermission()
@@ -170,7 +170,7 @@ class MainActivity : ComponentActivity() {
 }
 
 /**
- * View of application
+ * View of greeting application.
  */
 @Composable
 fun Greeting() {
