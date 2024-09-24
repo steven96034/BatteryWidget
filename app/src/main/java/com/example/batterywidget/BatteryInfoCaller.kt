@@ -13,6 +13,7 @@ class BatteryInfoCaller(context: Context) {
     private val remainingBattery = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
     private val remainingTime = batteryManager.computeChargeTimeRemaining() / 1000 / 60
     private val current = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW)
+    private val avgCurrent = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_AVERAGE)
 
 
     private val status = when (batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_STATUS)) {
@@ -27,9 +28,9 @@ class BatteryInfoCaller(context: Context) {
     private val intent = context.registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
 
     private val technology = intent?.getStringExtra(BatteryManager.EXTRA_TECHNOLOGY) ?: "Unknown"
-    private val voltage = intent?.getIntExtra(BatteryManager.EXTRA_VOLTAGE, -1)
-    private val temperature = intent?.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, -1)
-    private val iconID = intent?.getIntExtra(BatteryManager.EXTRA_ICON_SMALL, -1)
+    private val voltage = intent?.getIntExtra(BatteryManager.EXTRA_VOLTAGE, -1)?.toFloat()?.div(1000)
+    private val temperature = intent?.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, -1)?.toFloat()?.div(10)
+    //private val iconID = intent?.getIntExtra(BatteryManager.EXTRA_ICON_SMALL, -1)
     @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     val chargingStatus = intent?.getStringExtra(BatteryManager.EXTRA_CHARGING_STATUS) ?: "Unknown"
     @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
@@ -43,6 +44,7 @@ class BatteryInfoCaller(context: Context) {
         BatteryManager.BATTERY_PLUGGED_USB -> "USB"
         BatteryManager.BATTERY_PLUGGED_WIRELESS -> "Wireless"
         BatteryManager.BATTERY_PLUGGED_DOCK -> "Dock"
+        0 -> "Not Plugged"
         else -> "Out of Spec..."
     }
 
@@ -59,10 +61,10 @@ class BatteryInfoCaller(context: Context) {
 
     @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     fun getBatteryInfoApi34(): BatteryInfoDataClass {
-        return BatteryInfoDataClass(remainingBattery, remainingTime, current, status, technology, voltage, temperature, iconID, chargingStatus, cycleCount, extraStatus, plugged, health)
+        return BatteryInfoDataClass(remainingBattery, remainingTime, current, status, technology, voltage, temperature, chargingStatus, cycleCount, extraStatus, plugged, health, avgCurrent)
     }
     fun getBatteryInfoApi31(): BatteryInfoDataClass {
-        return BatteryInfoDataClass(remainingBattery, remainingTime, current, status, technology, voltage, temperature, iconID, "Cannot manifest this data lower than Api 34. (Android 14)", 0, "Cannot manifest under Api 34. (Android 14)", plugged, health)
+        return BatteryInfoDataClass(remainingBattery, remainingTime, current, status, technology, voltage, temperature, "Cannot manifest this data lower than Api 34. (Android 14)", 0, "Cannot manifest under Api 34. (Android 14)", plugged, health, avgCurrent)
     }
 }
 

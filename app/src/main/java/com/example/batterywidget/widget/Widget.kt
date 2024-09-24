@@ -40,9 +40,6 @@ import java.time.format.DateTimeFormatter
  */
 class BatteryWidget : GlanceAppWidget() {
 
-    private lateinit var settingDataStore: SettingDataStore
-
-
     data class BatteryInfo(
         val battery: Int,
         val current: Int,
@@ -53,7 +50,7 @@ class BatteryWidget : GlanceAppWidget() {
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val batteryInfo = getBatteryInfo(context)
         val time = getTimeStamp()
-        settingDataStore = SettingDataStore(context)
+        val settingDataStore = SettingDataStore(context)
 
         provideContent {
             val updatedTimes by settingDataStore.countUpdateFlow.collectAsState(0)
