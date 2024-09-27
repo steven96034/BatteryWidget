@@ -2,7 +2,6 @@ package com.example.batterywidget
 
 import android.app.Application
 import android.content.Context
-import android.os.Build
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,7 +29,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,7 +37,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -55,18 +52,15 @@ class MainPageContent {
     fun Content() {
         val currentContext = LocalContext.current
         val viewModel = remember {
-            MainPageViewModel(currentContext.applicationContext as Application)
+            MainPageViewModel(currentContext.applicationContext as Application, batteryApiService = BatteryApi(currentContext))
         }
 
-        //val batteryInfo = updateBatteryData(currentContext)
-
         DoTopAppBar(viewModel)
-        //DoTopAppBar(batteryInfo)
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    private fun DoTopAppBar(viewModel: MainPageViewModel /*batteryInfo: BatteryInfoDataClass*/) {
+    private fun DoTopAppBar(viewModel: MainPageViewModel) {
 
         val batteryInfo by viewModel.batteryInfo.collectAsState()
 
@@ -202,35 +196,20 @@ class MainPageContent {
      * Below for Preview
      */
 
-//    @Composable
-//    private fun updateBatteryData(context: Context): BatteryInfoDataClass {
-//        return if (isInPreview()) {
-//            localBatteryInfo.current
-//        } else {
-//            getBatteryInfoByVersion(context)
-//        }
-//    }
-//
-//    private fun getBatteryInfoByVersion(context: Context): BatteryInfoDataClass {
-//        return if (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-//            BatteryInfoCaller(context).getBatteryInfoApi31()
-//        } else {
-//            BatteryInfoCaller(context).getBatteryInfoApi34()
-//        }
-//    }
-//
-//    private val localBatteryInfo = compositionLocalOf {
-//        BatteryInfoDataClass(0, 0.toLong(), 0, "Unknown", "Unknown", 0.0F, 0.0F, "Unknown", 0, "Unknown", "Unknown", "Unknown", 0)
-//    }
-//
-//    @Composable
-//    fun isInPreview(): Boolean {
-//        return LocalInspectionMode.current
-//    }
-//
-//    @Preview(showBackground = true)
-//    @Composable
-//    fun BatteryPreview() {
-//        Content()
-//    }
+    @Preview
+    @Composable
+    fun BatteryAppPreview() {
+        val viewModel = MainPageViewModel(application = Application(),
+            preview = true,
+            MockBatteryApiService(LocalContext.current)
+        )
+
+        DoTopAppBar(viewModel)
+    }
+
+    private class MockBatteryApiService(context: Context) : BatteryApi(context) {
+        override fun fetchBatteryInfo(): BatteryInfoDataClass {
+            return BatteryInfoDataClass(0, 0.toLong(), 0, "Unknown", "Unknown", 0.0F, 0.0F, "Unknown", 0, "Unknown", "Unknown", "Unknown", 0)
+        }
+    }
 }

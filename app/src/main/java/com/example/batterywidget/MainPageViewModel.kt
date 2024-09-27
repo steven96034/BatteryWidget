@@ -13,19 +13,15 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-open class MainPageViewModel(application: Application): AndroidViewModel(application) {
+open class MainPageViewModel(application: Application, preview: Boolean = false,
+                             private val batteryApiService: BatteryApi
+): AndroidViewModel(application) {
     private val _batteryInfo = MutableStateFlow(BatteryInfoDataClass(0, 0.toLong(), 0, "Unknown", "Unknown", 0.0F, 0.0F, "Unknown", 0, "Unknown", "Unknown", "Unknown", 0))
     val batteryInfo: StateFlow<BatteryInfoDataClass> = _batteryInfo
-    private val batteryApplication = application as BatteryApplication
-    private val batteryApiService = batteryApplication.apiService
-    /**
-     * Seems like this is not working
-     */
-    //private val batteryApiService = getApplication<BatteryApplication>().apiService
-
 
     init {
-        updateBatteryData()
+        if (!preview)
+            updateBatteryData()
     }
 
     fun updateBatteryData() {
@@ -45,14 +41,8 @@ open class MainPageViewModel(application: Application): AndroidViewModel(applica
     }
 }
 
-class BatteryApplication : Application() {
-    val apiService by lazy {
-        BatteryApi(this)
-    }
-}
-
-class BatteryApi(private val context: Context) {
-    fun fetchBatteryInfo(): BatteryInfoDataClass {
+open class BatteryApi(private val context: Context) {
+    open fun fetchBatteryInfo(): BatteryInfoDataClass {
         return if (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             BatteryInfoCaller(context).getBatteryInfoApi31()
         } else {
@@ -60,22 +50,3 @@ class BatteryApi(private val context: Context) {
         }
     }
 }
-
-/*
-* PreviewViewModel For Preview (but not works)
- */
-
-//class PreviewViewModel(application: Application): MainPageViewModel(application) {
-//    private val _batteryInfo = MutableStateFlow(BatteryInfoDataClass(0, 0.toLong(), 0, "Unknown", "Unknown", 0.0F, 0.0F, "Unknown", 0, "Unknown", "Unknown", "Unknown", 0))
-//    override val batteryInfo: StateFlow<BatteryInfoDataClass> = _batteryInfo
-//
-//    init {
-//        _batteryInfo.value = BatteryInfoDataClass(0, 0.toLong(), 0, "Unknown", "Unknown", 0.0F, 0.0F, "Unknown", 0, "Unknown", "Unknown", "Unknown", 0)
-//    }
-//
-////    fun updateBatteryData() {
-////
-////    }
-//
-//
-//}
