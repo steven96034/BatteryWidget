@@ -16,7 +16,7 @@ import kotlinx.coroutines.launch
 open class MainPageViewModel(application: Application, preview: Boolean = false,
                              private val batteryApiService: BatteryApi
 ): AndroidViewModel(application) {
-    private val _batteryInfo = MutableStateFlow(BatteryInfoDataClass(0, 0.toLong(), 0, "Unknown", "Unknown", 0.0F, 0.0F, "Unknown", 0, "Unknown", "Unknown", "Unknown", 0))
+    private val _batteryInfo = MutableStateFlow(BatteryInfoDataClass(0, 0.toLong(), 0, "Unknown", "Unknown", 0.0F, 0.0F, 0, "Unknown", "Unknown", 0))
     val batteryInfo: StateFlow<BatteryInfoDataClass> = _batteryInfo
 
     init {

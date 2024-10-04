@@ -31,6 +31,7 @@ import androidx.glance.layout.padding
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import com.example.batterywidget.MainActivity
+import com.example.batterywidget.SharedDataStore
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -51,13 +52,15 @@ class BatteryWidget : GlanceAppWidget() {
         val batteryInfo = getBatteryInfo(context)
         val time = getTimeStamp()
         val settingDataStore = SettingDataStore(context)
+        val sharedDataStore = SharedDataStore(context)
 
         provideContent {
             val updatedTimes by settingDataStore.countUpdateFlow.collectAsState(0)
             val isRunning by settingDataStore.isAlarmRunningFlow.collectAsState(true)
+            val alarmInterval by sharedDataStore.alarmIntervalFlow.collectAsState(60000)
             Log.d("updatedTimes", "$updatedTimes")
 
-            BatteryWidgetContent(batteryInfo, time, updatedTimes, isRunning)
+            BatteryWidgetContent(batteryInfo, time, updatedTimes, isRunning, alarmInterval)
         }
     }
 
@@ -65,7 +68,7 @@ class BatteryWidget : GlanceAppWidget() {
      * View of Widget
      */
     @Composable
-    private fun BatteryWidgetContent(batteryInfo: BatteryInfo, time: String, updatedTimes: Int, isRunning: Boolean) {
+    private fun BatteryWidgetContent(batteryInfo: BatteryInfo, time: String, updatedTimes: Int, isRunning: Boolean, alarmInterval: Int) {
 
         val textStyleBig =
             TextStyle(fontSize = 12.sp, color = ColorProvider(Color.White, Color.White))
@@ -127,7 +130,7 @@ class BatteryWidget : GlanceAppWidget() {
                     provider = ImageProvider(if (isRunning) android.R.drawable.ic_media_pause else android.R.drawable.ic_media_play),
                     contentDescription = if (isRunning) "Stop" else "Start",
                     modifier = GlanceModifier.clickable(actionRunCallback<ToggleAction>(
-                        parameters = actionParametersOf(ActionParameters.Key<Boolean>("isRunning") to isRunning)))
+                        parameters = actionParametersOf(ActionParameters.Key<Boolean>("isRunning") to isRunning, ActionParameters.Key<Int>("alarmInterval") to alarmInterval)))
                         .defaultWeight()
                 )
             }

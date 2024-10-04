@@ -131,8 +131,6 @@ class MainActivity : ComponentActivity() {
                             TextButton(
                                 onClick = {
                                     shouldShowDialog.value = false
-                                    // Do not manifest anything.
-                                    // Or use some snackbar to manifest some messages.
                                 }
                             ) {
                                 Text("Dismiss")
@@ -162,32 +160,6 @@ class MainActivity : ComponentActivity() {
         if (isGranted) {
             Toast.makeText(this, "Notification permission has been granted.", Toast.LENGTH_SHORT)
                 .show()
-        } else {
-            // Do not manifest anything.
-            // Or use some snackbar to manifest some messages.
-        }
-    }
-}
-
-/**
- * View of greeting application.
- */
-@Composable
-fun Greeting() {
-    Row(modifier = Modifier.padding(16.dp)) {
-        Column(modifier = Modifier.align(alignment = Alignment.CenterVertically).padding(10.dp)) {
-            Text(
-                text = "Haven't implement settings here.",
-                modifier = Modifier.align(alignment = Alignment.CenterHorizontally),
-                style = MaterialTheme.typography.headlineSmall
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = "Back to homepage and enjoy the widget!",
-                modifier = Modifier.align(alignment = Alignment.CenterHorizontally),
-                style = MaterialTheme.typography.bodyLarge,
-                color = Color.LightGray
-            )
         }
     }
 }

@@ -8,11 +8,11 @@ data class BatteryInfoDataClass(
     val technology: String,
     val voltage: Float?,
     val temperature: Float?,
-    val chargingStatus: String,
     val cycleCount: Int?,
-    val extraStatus: String,
     val plugged: String,
     val health: String,
     val avgCurrent: Int
-    // val iconID: Int
-)
+//    val iconID: Int
+//    val chargingStatus: Int?,
+//    val extraStatus: Int?,
+    )

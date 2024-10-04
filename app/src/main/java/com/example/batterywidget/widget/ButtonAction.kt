@@ -48,6 +48,7 @@ class ToggleAction : ActionCallback {
         parameters: ActionParameters
     ) {
         val isRunning = parameters[ActionParameters.Key<Boolean>("isRunning")]
+        val alarmInterval = parameters[ActionParameters.Key<Int>("alarmInterval")]
         val settingDataStore = SettingDataStore(context)
 
         if (isRunning == true) {
@@ -56,7 +57,9 @@ class ToggleAction : ActionCallback {
             settingDataStore.inverseIsAlarmRunning(context)
             Log.d("Toggle", "cancelUpdate!!!After, $isRunning")
         } else {
-            scheduleUpdate(context)
+            if (alarmInterval != null) {
+                scheduleUpdate(context, alarmInterval)
+            }
             Log.d("Toggle", "scheduledUpdate!!!Before, $isRunning")
             settingDataStore.inverseIsAlarmRunning(context)
             Log.d("Toggle", "scheduleUpdate!!!After, $isRunning")
@@ -78,7 +81,7 @@ private suspend fun incrementCount(context: Context) {
 }
 
 
-private fun scheduleUpdate(context: Context) {
+private fun scheduleUpdate(context: Context, alarmInterval: Int) {
     val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
     val intent = Intent(context, UpdateBroadcastReceiver::class.java)
     val pendingIntent = PendingIntent.getBroadcast(
@@ -91,7 +94,7 @@ private fun scheduleUpdate(context: Context) {
     alarmManager.setInexactRepeating(
         AlarmManager.ELAPSED_REALTIME,
         SystemClock.elapsedRealtime() + 30000,
-        60000,
+        alarmInterval.toLong(),
         pendingIntent
     )
 

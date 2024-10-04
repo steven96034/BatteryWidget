@@ -30,13 +30,13 @@ class BatteryInfoCaller(context: Context) {
     private val technology = intent?.getStringExtra(BatteryManager.EXTRA_TECHNOLOGY) ?: "Unknown"
     private val voltage = intent?.getIntExtra(BatteryManager.EXTRA_VOLTAGE, -1)?.toFloat()?.div(1000)
     private val temperature = intent?.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, -1)?.toFloat()?.div(10)
-    //private val iconID = intent?.getIntExtra(BatteryManager.EXTRA_ICON_SMALL, -1)
-    @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
-    val chargingStatus = intent?.getStringExtra(BatteryManager.EXTRA_CHARGING_STATUS) ?: "Unknown"
     @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     val cycleCount = intent?.getIntExtra(BatteryManager.EXTRA_CYCLE_COUNT, -1)
-    @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
-    val extraStatus = intent?.getStringExtra(BatteryManager.EXTRA_STATUS) ?: "Unknown"
+//    private val iconID = intent?.getIntExtra(BatteryManager.EXTRA_ICON_SMALL, -1)
+//    @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+//    val chargingStatus = intent?.getIntExtra(BatteryManager.EXTRA_CHARGING_STATUS, -1)
+//    @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+//    val extraStatus = intent?.getIntExtra(BatteryManager.EXTRA_STATUS, -1)
 
 
     private val plugged = when (intent?.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1)) {
@@ -61,10 +61,10 @@ class BatteryInfoCaller(context: Context) {
 
     @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     fun getBatteryInfoApi34(): BatteryInfoDataClass {
-        return BatteryInfoDataClass(remainingBattery, remainingTime, current, status, technology, voltage, temperature, chargingStatus, cycleCount, extraStatus, plugged, health, avgCurrent)
+        return BatteryInfoDataClass(remainingBattery, remainingTime, current, status, technology, voltage, temperature, cycleCount, plugged, health, avgCurrent)
     }
     fun getBatteryInfoApi31(): BatteryInfoDataClass {
-        return BatteryInfoDataClass(remainingBattery, remainingTime, current, status, technology, voltage, temperature, "Cannot manifest this data lower than Api 34. (Android 14)", 0, "Cannot manifest under Api 34. (Android 14)", plugged, health, avgCurrent)
+        return BatteryInfoDataClass(remainingBattery, remainingTime, current, status, technology, voltage, temperature, -1, plugged, health, avgCurrent)
     }
 }
 
