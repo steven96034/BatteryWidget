@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
+    <!-- For SplashScreen (Launch Screen) -->
     <style name="Theme.App.Starting" parent="Theme.SplashScreen">
         <!-- Set Background -->
         <item name="windowSplashScreenBackground">@color/black</item>
 
         <!-- Set Icon -->
-        <item name="windowSplashScreenAnimatedIcon">@drawable/launcher_battery_icon</item>
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
         <item name="android:windowSplashScreenIconBackgroundColor">@color/white</item>
 
         <!-- Set Animation Time -->

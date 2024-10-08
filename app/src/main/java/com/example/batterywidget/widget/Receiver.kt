@@ -6,6 +6,7 @@ import android.content.Intent
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import androidx.glance.appwidget.updateAll
+import com.example.batterywidget.SharedDataStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -27,8 +28,8 @@ class UpdateBroadcastReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         scope.launch {
             //BatteryWidget.count++
-            val settingDataStore = SettingDataStore(context)
-            settingDataStore.incrementUpdateTimes(context)
+            val sharedDataStore = SharedDataStore(context)
+            sharedDataStore.incrementUpdateTimes(context)
 
             BatteryWidget().updateAll(context)
         }

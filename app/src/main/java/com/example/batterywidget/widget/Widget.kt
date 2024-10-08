@@ -55,12 +55,13 @@ class BatteryWidget : GlanceAppWidget() {
         val sharedDataStore = SharedDataStore(context)
 
         provideContent {
-            val updatedTimes by settingDataStore.countUpdateFlow.collectAsState(0)
             val isRunning by settingDataStore.isAlarmRunningFlow.collectAsState(true)
+            val updatedTimes by sharedDataStore.countUpdateFlow.collectAsState(0)
             val alarmInterval by sharedDataStore.alarmIntervalFlow.collectAsState(60000)
+            val isUpdateTimesManifest by sharedDataStore.isUpdatedTimesManifestFlow.collectAsState(true)
             Log.d("updatedTimes", "$updatedTimes")
 
-            BatteryWidgetContent(batteryInfo, time, updatedTimes, isRunning, alarmInterval)
+            BatteryWidgetContent(batteryInfo, time, updatedTimes, isRunning, alarmInterval, isUpdateTimesManifest)
         }
     }
 
@@ -68,7 +69,7 @@ class BatteryWidget : GlanceAppWidget() {
      * View of Widget
      */
     @Composable
-    private fun BatteryWidgetContent(batteryInfo: BatteryInfo, time: String, updatedTimes: Int, isRunning: Boolean, alarmInterval: Int) {
+    private fun BatteryWidgetContent(batteryInfo: BatteryInfo, time: String, updatedTimes: Int, isRunning: Boolean, alarmInterval: Int, isUpdateTimesManifest: Boolean) {
 
         val textStyleBig =
             TextStyle(fontSize = 12.sp, color = ColorProvider(Color.White, Color.White))
@@ -104,11 +105,13 @@ class BatteryWidget : GlanceAppWidget() {
                     style = textStyleBig,
                     modifier = GlanceModifier.defaultWeight()
                 )
-                Text(
-                    text = "Updated Times: $updatedTimes",
-                    style = textStyleBig,
-                    modifier = GlanceModifier.defaultWeight()
-                )
+                if (isUpdateTimesManifest) {
+                    Text(
+                        text = "Updated Times: $updatedTimes",
+                        style = textStyleBig,
+                        modifier = GlanceModifier.defaultWeight()
+                    )
+                }
                 Text(
                     text = "Last Updated Time: $time",
                     style = textStyleSmall,

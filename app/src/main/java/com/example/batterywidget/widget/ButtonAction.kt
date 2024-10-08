@@ -12,6 +12,7 @@ import android.widget.Toast
 import androidx.glance.GlanceId
 import androidx.glance.action.ActionParameters
 import androidx.glance.appwidget.action.ActionCallback
+import com.example.batterywidget.SharedDataStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -72,11 +73,11 @@ class ToggleAction : ActionCallback {
 }
 
 private suspend fun incrementCount(context: Context) {
-    val settingDataStore = SettingDataStore(context)
+    val sharedDataStore = SharedDataStore(context)
     val job = Job()
     val scope = CoroutineScope(Dispatchers.Main + job)
     scope.launch{
-        settingDataStore.incrementUpdateTimes(context)
+        sharedDataStore.incrementUpdateTimes(context)
     }
 }
 
