@@ -2,7 +2,6 @@ package com.example.batterywidget.widget
 
 import android.content.Context
 import android.os.BatteryManager
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -24,6 +23,7 @@ import androidx.glance.background
 import androidx.glance.color.ColorProvider
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Column
+import androidx.glance.layout.ContentScale
 import androidx.glance.layout.Row
 import androidx.glance.layout.fillMaxHeight
 import androidx.glance.layout.fillMaxWidth
@@ -31,6 +31,7 @@ import androidx.glance.layout.padding
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import com.example.batterywidget.MainActivity
+import com.example.batterywidget.R
 import com.example.batterywidget.SharedDataStore
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -59,9 +60,9 @@ class BatteryWidget : GlanceAppWidget() {
             val updatedTimes by sharedDataStore.countUpdateFlow.collectAsState(0)
             val alarmInterval by sharedDataStore.alarmIntervalFlow.collectAsState(60000)
             val isUpdateTimesManifest by sharedDataStore.isUpdatedTimesManifestFlow.collectAsState(true)
-            Log.d("updatedTimes", "$updatedTimes")
+            val isWidgetSimpleUIManifest by sharedDataStore.isWidgetSimpleUIManifestFlow.collectAsState(true)
 
-            BatteryWidgetContent(batteryInfo, time, updatedTimes, isRunning, alarmInterval, isUpdateTimesManifest)
+            BatteryWidgetContent(batteryInfo, time, updatedTimes, isRunning, alarmInterval, isUpdateTimesManifest, isWidgetSimpleUIManifest)
         }
     }
 
@@ -69,57 +70,91 @@ class BatteryWidget : GlanceAppWidget() {
      * View of Widget
      */
     @Composable
-    private fun BatteryWidgetContent(batteryInfo: BatteryInfo, time: String, updatedTimes: Int, isRunning: Boolean, alarmInterval: Int, isUpdateTimesManifest: Boolean) {
+    private fun BatteryWidgetContent(batteryInfo: BatteryInfo, time: String, updatedTimes: Int, isRunning: Boolean, alarmInterval: Int, isUpdateTimesManifest: Boolean, isWidgetSimpleUIManifest: Boolean) {
 
         val textStyleBig =
             TextStyle(fontSize = 12.sp, color = ColorProvider(Color.White, Color.White))
         val textStyleSmall =
             TextStyle(fontSize = 10.sp, color = ColorProvider(Color.White, Color.White))
 
+
         Row(
             modifier = GlanceModifier.fillMaxWidth().background(color = Color.DarkGray)
         ) {
-            Column(
-                modifier = GlanceModifier.padding(8.dp).clickable(
-                    actionStartActivity<MainActivity>()
-                ),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = "Battery Percentage: ${batteryInfo.battery}%",
-                    style = textStyleBig,
-                    modifier = GlanceModifier.defaultWeight()
-                )
-                Text(
-                    text = "Remaining Time: ${batteryInfo.remainingTime} min",
-                    style = textStyleBig,
-                    modifier = GlanceModifier.defaultWeight()
-                )
-                Text(
-                    text = "Current: ${batteryInfo.current} mA",
-                    style = textStyleBig,
-                    modifier = GlanceModifier.defaultWeight()
-                )
-                Text(
-                    text = "Charging?: ${batteryInfo.status}",
-                    style = textStyleBig,
-                    modifier = GlanceModifier.defaultWeight()
-                )
-                if (isUpdateTimesManifest) {
+            if (isWidgetSimpleUIManifest && batteryInfo.status == "No") {
+                Column(modifier = GlanceModifier
+                    .padding(8.dp)
+                    .clickable(actionStartActivity<MainActivity>()),
+                    horizontalAlignment = Alignment.CenterHorizontally) {
+                    Image(
+                        provider = ImageProvider(R.mipmap.ic_launcher_round),
+                        contentDescription = "Battery Icon",
+                        modifier = GlanceModifier.defaultWeight(),
+                        contentScale = ContentScale.Fit
+                    )
+                    Row {
+                        Text(
+                            text = "Battery Level ${batteryInfo.battery}%",
+                            style = textStyleBig,
+                            modifier = GlanceModifier.defaultWeight().padding(start = 16.dp, end = 16.dp)
+                        )
+                    }
+                    Row {
+                        Text(
+                            text = "Not Charging.",
+                            style = textStyleBig,
+                            modifier = GlanceModifier.defaultWeight()
+                        )
+                    }
+                }
+            }
+            else {
+                Column(
+                    modifier = GlanceModifier
+                        .padding(8.dp)
+                        .background(
+                            ImageProvider(R.drawable.launcher_battery_icon),
+                            contentScale = ContentScale.Fit
+                        )
+                        .clickable(actionStartActivity<MainActivity>()),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
                     Text(
-                        text = "Updated Times: $updatedTimes",
+                        text = "Battery Level: ${batteryInfo.battery}%",
                         style = textStyleBig,
                         modifier = GlanceModifier.defaultWeight()
                     )
+                    Text(
+                        text = "Remaining Time: ${batteryInfo.remainingTime} min",
+                        style = textStyleBig,
+                        modifier = GlanceModifier.defaultWeight()
+                    )
+                    Text(
+                        text = "Current: ${batteryInfo.current} mA",
+                        style = textStyleBig,
+                        modifier = GlanceModifier.defaultWeight()
+                    )
+                    Text(
+                        text = "Is Charging?: ${batteryInfo.status}",
+                        style = textStyleBig,
+                        modifier = GlanceModifier.defaultWeight()
+                    )
+                    if (isUpdateTimesManifest) {
+                        Text(
+                            text = "Updated Times: $updatedTimes",
+                            style = textStyleBig,
+                            modifier = GlanceModifier.defaultWeight()
+                        )
+                    }
+                    Text(
+                        text = "Last Updated Time: $time",
+                        style = textStyleSmall,
+                        modifier = GlanceModifier.defaultWeight()
+                    )
                 }
-                Text(
-                    text = "Last Updated Time: $time",
-                    style = textStyleSmall,
-                    modifier = GlanceModifier.defaultWeight()
-                )
             }
             Column(
-                modifier = GlanceModifier.fillMaxHeight().background(color = Color.LightGray),
+                modifier = GlanceModifier.fillMaxHeight().fillMaxWidth().background(color = Color.LightGray),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalAlignment = Alignment.End
             ) {
@@ -138,14 +173,12 @@ class BatteryWidget : GlanceAppWidget() {
                 )
             }
         }
-        Log.d("UI", "After UI Updated, $isRunning")
     }
 
     private fun getBatteryInfo(context: Context): BatteryInfo {
         val batteryManager = context.getSystemService(Context.BATTERY_SERVICE) as BatteryManager
         val battery = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
-        val remainingTime =
-            batteryManager.computeChargeTimeRemaining() // millisecond * 1000 = second
+        val remainingTime = batteryManager.computeChargeTimeRemaining() // millisecond * 1000 = second
         val current = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW)
         val status = if (remainingTime.toInt() != 0) "Yes" else "No"
         return BatteryInfo(battery, current, status, remainingTime / 1000 / 60)

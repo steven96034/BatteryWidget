@@ -70,9 +70,12 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -160,7 +163,7 @@ class MainPageContent {
                         }
                     },
                     scrollBehavior = scrollBehavior,
-                    actions = {
+                    actions = { if (currentRoute == "Home") {
                         Box {
                             IconButton(onClick = { expandedMenu = true }) {
                                 Icon(
@@ -190,7 +193,7 @@ class MainPageContent {
                                 )
                             }
                         }
-                    }
+                    } }
                 )
             },
             floatingActionButtonPosition = FabPosition.End,
@@ -214,7 +217,9 @@ class MainPageContent {
         )
     }
 
-    // Navigation host settings.
+    /**
+     * Navigation host settings.
+     */
     @Composable
     fun NavigationHost(navController: NavHostController, innerPadding: PaddingValues, viewModel: MainPageViewModel){
         NavHost(navController= navController, startDestination = "Home") {
@@ -230,7 +235,9 @@ class MainPageContent {
         }
     }
 
-    // Normal text content style.
+    /**
+     * Icon with normal text and description.
+     */
     @Composable
     fun ContentText(description: String, icon: Int, value: String){
         Card (elevation = CardDefaults.cardElevation(defaultElevation = 4.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant), modifier = Modifier.padding(4.dp)) {
@@ -259,6 +266,9 @@ class MainPageContent {
         }
     }
 
+    /**
+     * Text for some less important information.
+     */
     @Composable
     fun NoteText(text: String) {
         Text(
@@ -272,6 +282,9 @@ class MainPageContent {
         )
     }
 
+    /**
+     * Home Screen content.
+     */
     @Composable
     fun HomeScreen(viewModel: MainPageViewModel, innerPadding: PaddingValues){
         val batteryInfo by viewModel.batteryInfo.collectAsState()
@@ -310,7 +323,9 @@ class MainPageContent {
         }
     }
 
-
+    /**
+     * Simple text style.
+     */
     @Composable
     fun SimpleText(text: String) {
         Text(text = text,
@@ -322,6 +337,20 @@ class MainPageContent {
             letterSpacing = 0.2.sp)
     }
     @Composable
+    fun SimpleLightText(text: String) {
+        Text(text = text,
+            modifier = Modifier.padding(all = 8.dp),
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Light,
+            fontFamily = FontFamily.Default,
+            color = MaterialTheme.colorScheme.onBackground,
+            letterSpacing = 0.15.sp)
+    }
+
+    /**
+     * NoteText with index.
+     */
+    @Composable
     fun IndexedNoteText(index: Int, text: String) {
         Row {
             NoteText("$index.")
@@ -329,6 +358,9 @@ class MainPageContent {
         }
     }
 
+    /**
+     * Widget Settings Screen content.
+     */
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun WidgetSettingsScreen(innerPadding: PaddingValues) {
@@ -337,6 +369,7 @@ class MainPageContent {
         val alarmInterval by sharedDataStore.alarmIntervalFlow.collectAsState(60000)
         val updatedTimes by sharedDataStore.countUpdateFlow.collectAsState(0)
         val isUpdatedTimesManifest by sharedDataStore.isUpdatedTimesManifestFlow.collectAsState(true)
+        val isWidgetSimpleUIManifest by sharedDataStore.isWidgetSimpleUIManifestFlow.collectAsState(true)
 
         var expandedMenu by remember { mutableStateOf(false) }
         val options = listOf("1", "1.5", "2", "3", "5")
@@ -363,9 +396,21 @@ class MainPageContent {
 
         LazyColumn (modifier = Modifier.padding(6.dp).fillMaxSize(), contentPadding = innerPadding) {
             item {
-                Row {
-                    Icon(painterResource(R.drawable.alarm_icon), contentDescription = "Alarm Icon", modifier = Modifier.padding(top = 4.dp))
-                    SimpleText("Alarm Interval for Widget Update: ${alarmInterval.toDouble()/60000.0} minutes.")
+                Row(modifier = Modifier.padding(top = 12.dp)) {
+                    Icon(painterResource(R.drawable.alarm_icon), contentDescription = "Alarm Icon", modifier = Modifier.padding(top = 6.dp))
+                    val intervalString = buildAnnotatedString {
+                        append("Alarm Interval for Widget Update: ")
+                        withStyle(SpanStyle(textDecoration = TextDecoration.Underline)) {append("${alarmInterval.toDouble()/60000.0}")}
+                        append(" minutes.")
+                    }
+                    Text(text = intervalString,
+                        modifier = Modifier.padding(all = 8.dp),
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Normal,
+                        fontFamily = FontFamily.Default,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        letterSpacing = 0.2.sp
+                    )
                 }
                 ExposedDropdownMenuBox (
                     expanded = expandedMenu,
@@ -446,11 +491,22 @@ class MainPageContent {
             }
             item {
                 Row(modifier = Modifier.padding(top = 4.dp)) {
-                    Icon(Icons.Filled.Build, contentDescription = "Check", modifier = Modifier.padding(top = 4.dp))
-                    SimpleText("Updated Times: $updatedTimes (now)")
+                    Icon(Icons.Filled.Build, contentDescription = "Updated Times Setting", modifier = Modifier.padding(top = 6.dp))
+                    val updatedTimesString = buildAnnotatedString {
+                        append("Updated Times: ")
+                        withStyle(SpanStyle(textDecoration = TextDecoration.Underline)) {append("$updatedTimes")}
+                        append(" times.")}
+                    Text(text = updatedTimesString,
+                        modifier = Modifier.padding(all = 8.dp),
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Normal,
+                        fontFamily = FontFamily.Default,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        letterSpacing = 0.2.sp
+                    )
                 }
                 Row(modifier = Modifier.padding(start = 24.dp)) {
-                    SimpleText("Recount updated times.")
+                    SimpleLightText("Recount updated times.")
                     ElevatedButton(onClick = {
                         scope.launch {
                             sharedDataStore.resetUpdatedTimes(context)
@@ -463,7 +519,7 @@ class MainPageContent {
                     ) { }
                 }
                 Row(modifier = Modifier.padding(start = 24.dp)) {
-                    SimpleText("Manifest updated times.")
+                    SimpleLightText("Manifest updated times.")
                     Switch(
                         checked = isUpdatedTimesManifest,
                         onCheckedChange = {
@@ -472,6 +528,48 @@ class MainPageContent {
                             }
                                           },
                         )
+                }
+            }
+            item {
+                HorizontalDivider(modifier = Modifier.padding(all = 4.dp).padding(top = 16.dp, bottom = 16.dp))
+                Row(modifier = Modifier.padding(top = 4.dp)) {
+                    Column (modifier = Modifier.weight(3f)){
+                        Row {
+                            Icon(
+                                painterResource(R.drawable.is_widget_simple_ui_manifest_icon),
+                                contentDescription = "Widget UI Settings",
+                                modifier = Modifier.padding(top = 6.dp)
+                            )
+                            val isWidgetUIManifestString = buildAnnotatedString {
+                                append("Simple UI mode for widget\n(when not charging): ")
+                                withStyle(SpanStyle(textDecoration = TextDecoration.Underline)) {
+                                    append(
+                                        if (isWidgetSimpleUIManifest) "Yes(Default)" else "No"
+                                    )
+                                }
+                            }
+                            Text(
+                                text = isWidgetUIManifestString,
+                                modifier = Modifier.padding(all = 8.dp),
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Normal,
+                                fontFamily = FontFamily.Default,
+                                color = MaterialTheme.colorScheme.onBackground,
+                                letterSpacing = 0.2.sp
+                            )
+                        }
+                    }
+                    Column (modifier = Modifier.weight(1f).padding(top = 4.dp)){
+                        Switch(
+                            modifier = Modifier,
+                            checked = isWidgetSimpleUIManifest,
+                            onCheckedChange = {
+                                scope.launch {
+                                    sharedDataStore.inverseIsWidgetSimpleUIManifest(context)
+                                }
+                            }
+                        )
+                    }
                 }
             }
             item {
@@ -487,7 +585,9 @@ class MainPageContent {
             }
         }
     }
-
+    /**
+     * About This App Screen content.
+     */
     @Composable
     fun AboutThisAppScreen(innerPadding: PaddingValues) {
         val url = "https://github.com/steven96034/BatteryWidget"

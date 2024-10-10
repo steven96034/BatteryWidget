@@ -7,7 +7,6 @@ import android.content.Intent
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
-import android.util.Log
 import android.widget.Toast
 import androidx.glance.GlanceId
 import androidx.glance.action.ActionParameters
@@ -27,10 +26,8 @@ class RefreshAction : ActionCallback {
         glanceId: GlanceId,
         parameters: ActionParameters
     ) {
-        //BatteryWidget.count++
         incrementCount(context)
 
-        Log.d("Refresh", "RefreshAction!!!")
         BatteryWidget().update(context, glanceId)
         val handler = Handler(Looper.getMainLooper())
         handler.post {
@@ -54,20 +51,15 @@ class ToggleAction : ActionCallback {
 
         if (isRunning == true) {
             cancelUpdate(context)
-            Log.d("Toggle", "cancelUpdate!!!Before, $isRunning")
             settingDataStore.inverseIsAlarmRunning(context)
-            Log.d("Toggle", "cancelUpdate!!!After, $isRunning")
         } else {
             if (alarmInterval != null) {
                 scheduleUpdate(context, alarmInterval)
             }
-            Log.d("Toggle", "scheduledUpdate!!!Before, $isRunning")
             settingDataStore.inverseIsAlarmRunning(context)
-            Log.d("Toggle", "scheduleUpdate!!!After, $isRunning")
         }
 
         incrementCount(context)
-
         BatteryWidget().update(context, glanceId)
     }
 }
@@ -115,7 +107,6 @@ private fun cancelUpdate(context: Context) {
         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
     )
     alarmManager.cancel(pendingIntent)
-    Log.d("ALARM", "ALARM HAS CANCELLED!")
 
 
     /**

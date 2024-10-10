@@ -27,7 +27,6 @@ class UpdateBroadcastReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         scope.launch {
-            //BatteryWidget.count++
             val sharedDataStore = SharedDataStore(context)
             sharedDataStore.incrementUpdateTimes(context)
 

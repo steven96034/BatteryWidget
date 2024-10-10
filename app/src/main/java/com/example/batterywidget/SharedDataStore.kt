@@ -19,13 +19,16 @@ class SharedDataStore (context: Context){
         val alarmIntervalCounter = intPreferencesKey("alarmInterval")
         val updateTimesCounter = intPreferencesKey("updateTimes")
         val isUpdateTimesManifestCounter = booleanPreferencesKey("isUpdateTimesManifest")
+        val isWidgetSimpleUIManifestCounter = booleanPreferencesKey("isWidgetUIManifest")
     }
 
+    /**
+     * For alarmInterval.
+     */
     val alarmIntervalFlow: Flow<Int> = context.sharedDataStore.data
         .map { preferences ->
             preferences[Key.alarmIntervalCounter] ?: 60000
         }
-
     suspend fun saveAlarmInterval(context: Context, interval: Int) {
         context.sharedDataStore.edit { preferences ->
             preferences[Key.alarmIntervalCounter] = interval
@@ -35,19 +38,16 @@ class SharedDataStore (context: Context){
     /**
      * For updateTimes.
      */
-
     val countUpdateFlow: Flow<Int> = context.dataStore.data
         .map { preferences ->
             preferences[Key.updateTimesCounter] ?: 0
         }
-
     suspend fun incrementUpdateTimes(context: Context) {
         context.dataStore.edit { preferences ->
             val currentTimes = preferences[Key.updateTimesCounter] ?: 0
             preferences[Key.updateTimesCounter] = currentTimes + 1
         }
     }
-
     suspend fun resetUpdatedTimes(context: Context) {
         context.dataStore.edit { preferences ->
             preferences[Key.updateTimesCounter] = 0
@@ -68,4 +68,19 @@ class SharedDataStore (context: Context){
             preferences[Key.isUpdateTimesManifestCounter] = !currentPref
         }
     }
+
+    /**
+     * For isWidgetUIManifest.
+     */
+    val isWidgetSimpleUIManifestFlow: Flow<Boolean> = context.sharedDataStore.data
+        .map { preferences ->
+            preferences[Key.isWidgetSimpleUIManifestCounter] ?: true
+        }
+    suspend fun inverseIsWidgetSimpleUIManifest(context: Context) {
+        context.sharedDataStore.edit { preferences ->
+            val currentPref = preferences[Key.isWidgetSimpleUIManifestCounter] ?: true
+            preferences[Key.isWidgetSimpleUIManifestCounter] = !currentPref
+        }
+    }
+
 }
