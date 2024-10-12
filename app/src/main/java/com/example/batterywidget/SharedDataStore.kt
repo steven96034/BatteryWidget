@@ -20,6 +20,7 @@ class SharedDataStore (context: Context){
         val updateTimesCounter = intPreferencesKey("updateTimes")
         val isUpdateTimesManifestCounter = booleanPreferencesKey("isUpdateTimesManifest")
         val isWidgetSimpleUIManifestCounter = booleanPreferencesKey("isWidgetUIManifest")
+        val isMilliAmpereCounter = booleanPreferencesKey("isMilliAmpere")
     }
 
     /**
@@ -83,4 +84,16 @@ class SharedDataStore (context: Context){
         }
     }
 
+    /**
+     * For isMicroAmpere.
+     */
+    val isMilliAmpereFlow: Flow<Boolean> = context.sharedDataStore.data
+        .map { preferences ->
+            preferences[Key.isMilliAmpereCounter] ?: true
+        }
+    suspend fun saveIsMilliAmpere(context: Context, isMilliAmpere: Boolean) {
+        context.sharedDataStore.edit { preferences ->
+            preferences[Key.isMilliAmpereCounter] = isMilliAmpere
+        }
+    }
 }

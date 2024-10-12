@@ -5,6 +5,7 @@
     android:minHeight="40dp"
     android:initialLayout="@layout/glance_default_loading_layout"
     android:targetCellWidth="2"
-    android:targetCellHeight="1"
+    android:targetCellHeight="2"
+    android:resizeMode="horizontal|vertical"
     android:widgetCategory="home_screen">
 </appwidget-provider>

@@ -6,6 +6,7 @@ import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -25,6 +26,7 @@ import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -42,6 +44,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuAnchorType
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
@@ -51,6 +54,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -285,9 +289,17 @@ class MainPageContent {
     /**
      * Home Screen content.
      */
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun HomeScreen(viewModel: MainPageViewModel, innerPadding: PaddingValues){
         val batteryInfo by viewModel.batteryInfo.collectAsState()
+        val sheetState = rememberModalBottomSheetState()
+        val scope = rememberCoroutineScope()
+        var showBottomSheet by remember { mutableStateOf(false) }
+        val context = LocalContext.current
+        val sharedDataStore = SharedDataStore(context)
+        val isMilliAmpere by sharedDataStore.isMilliAmpereFlow.collectAsState(true)
+
         Box(modifier = Modifier.padding(innerPadding).fillMaxSize()) {
             LazyColumn(modifier = Modifier.padding(6.dp)) {
                 item {
@@ -295,8 +307,8 @@ class MainPageContent {
                     ContentText("Power Source", R.drawable.power_source_icon, batteryInfo.plugged)
                     ContentText("Remaining Battery", R.drawable.remaining_battery_icon, "${batteryInfo.remainingBattery}%")
                     ContentText("Remaining Time for Charging", R.drawable.remaining_time_for_charging_icon, "${batteryInfo.remainingTime} min")
-                    ContentText("Instant Current", R.drawable.current_icon, "${batteryInfo.current} mA")
-                    ContentText("Average Current", R.drawable.current_icon, "${batteryInfo.avgCurrent} mA")
+                    ContentText("Instant Current", R.drawable.current_icon, if(isMilliAmpere) "${batteryInfo.current} mA" else "${batteryInfo.current} μA")
+                    ContentText("Average Current", R.drawable.current_icon, if(isMilliAmpere) "${batteryInfo.avgCurrent} mA" else "${batteryInfo.avgCurrent} μA")
                     ContentText("Technology", R.drawable.technology_icon, batteryInfo.technology)
                     ContentText("Voltage", R.drawable.voltage_icon, "${batteryInfo.voltage} V")
                     ContentText("Temperature", R.drawable.temperature_icon, "${batteryInfo.temperature} ℃")
@@ -311,6 +323,50 @@ class MainPageContent {
                         }
                         Spacer(modifier = Modifier.width(ButtonDefaults.IconSpacing))
                         Column {
+                            val chooseCurrentUnitString = buildAnnotatedString {
+                                append("If your current unit is wrong, ")
+                                withStyle(SpanStyle(textDecoration = TextDecoration.Underline)) {
+                                    pushStringAnnotation(tag = "clickable", annotation = "click me")
+                                    append("click me")
+                                    pop()
+                                }
+                                append(" to choose.")
+                            }
+                            Text(text = chooseCurrentUnitString,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Light,
+                                fontFamily = FontFamily.Default,
+                                color = MaterialTheme.colorScheme.onBackground,
+                                letterSpacing = 0.2.sp,
+                                modifier = Modifier.padding(all = 4.dp).clickable {
+                                chooseCurrentUnitString.getStringAnnotations("clickable", 32, 39).firstOrNull()?.let {
+                                    showBottomSheet = true
+                                }
+                            })
+                            if (showBottomSheet) {
+                                ModalBottomSheet(onDismissRequest = { showBottomSheet = false }, sheetState = sheetState, modifier = Modifier.padding(start = 24.dp, end = 24.dp, top = 8.dp)) {
+                                    Column(modifier = Modifier.padding(4.dp)) {
+                                        Text(if (isMilliAmpere) "Choose Current Unit (mA for now)" else "Choose Current Unit (μA for now)", modifier = Modifier.align(Alignment.CenterHorizontally))
+                                        Spacer(modifier = Modifier.height(16.dp))
+                                        Row (modifier = Modifier.padding(4.dp), horizontalArrangement = Arrangement.SpaceBetween){
+                                            Button(modifier = Modifier.weight(1f), onClick = {
+                                                scope.launch {
+                                                    sharedDataStore.saveIsMilliAmpere(context, true)
+                                                    showBottomSheet = false
+                                                }
+                                            }){ Text("Milliampere (mA)") }
+                                            Button(modifier = Modifier.weight(1f), onClick = {
+                                                scope.launch {
+                                                    sharedDataStore.saveIsMilliAmpere(context, false)
+                                                    showBottomSheet = false
+                                                }
+                                            }){ Text("Microampere (μA)") }
+                                        }
+                                    }
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(4.dp))
                             NoteText("""For Current Information: "+" means charging, "-" means discharging. """)
                             Spacer(modifier = Modifier.height(4.dp))
                             NoteText(""""Cycle count" can be provided over Android 14 and above, also if phone manufacturer provides this information, it will be displayed non-zero.""")

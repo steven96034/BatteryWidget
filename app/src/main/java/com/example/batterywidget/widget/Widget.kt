@@ -18,6 +18,8 @@ import androidx.glance.action.actionStartActivity
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.action.actionRunCallback
+import androidx.glance.appwidget.components.Scaffold
+import androidx.glance.appwidget.components.TitleBar
 import androidx.glance.appwidget.provideContent
 import androidx.glance.background
 import androidx.glance.color.ColorProvider
@@ -25,7 +27,6 @@ import androidx.glance.layout.Alignment
 import androidx.glance.layout.Column
 import androidx.glance.layout.ContentScale
 import androidx.glance.layout.Row
-import androidx.glance.layout.fillMaxHeight
 import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.padding
 import androidx.glance.text.Text
@@ -61,8 +62,9 @@ class BatteryWidget : GlanceAppWidget() {
             val alarmInterval by sharedDataStore.alarmIntervalFlow.collectAsState(60000)
             val isUpdateTimesManifest by sharedDataStore.isUpdatedTimesManifestFlow.collectAsState(true)
             val isWidgetSimpleUIManifest by sharedDataStore.isWidgetSimpleUIManifestFlow.collectAsState(true)
+            val isMilliAmpere by sharedDataStore.isMilliAmpereFlow.collectAsState(true)
 
-            BatteryWidgetContent(batteryInfo, time, updatedTimes, isRunning, alarmInterval, isUpdateTimesManifest, isWidgetSimpleUIManifest)
+            BatteryWidgetContent(batteryInfo, time, updatedTimes, isRunning, alarmInterval, isUpdateTimesManifest, isWidgetSimpleUIManifest, isMilliAmpere)
         }
     }
 
@@ -70,107 +72,128 @@ class BatteryWidget : GlanceAppWidget() {
      * View of Widget
      */
     @Composable
-    private fun BatteryWidgetContent(batteryInfo: BatteryInfo, time: String, updatedTimes: Int, isRunning: Boolean, alarmInterval: Int, isUpdateTimesManifest: Boolean, isWidgetSimpleUIManifest: Boolean) {
+    private fun BatteryWidgetContent(batteryInfo: BatteryInfo, time: String, updatedTimes: Int, isRunning: Boolean, alarmInterval: Int, isUpdateTimesManifest: Boolean, isWidgetSimpleUIManifest: Boolean, isMilliAmpere: Boolean) {
 
         val textStyleBig =
             TextStyle(fontSize = 12.sp, color = ColorProvider(Color.White, Color.White))
         val textStyleSmall =
             TextStyle(fontSize = 10.sp, color = ColorProvider(Color.White, Color.White))
 
-
-        Row(
-            modifier = GlanceModifier.fillMaxWidth().background(color = Color.DarkGray)
+        Scaffold (
+            modifier = GlanceModifier,
+            titleBar = { TitleBar(startIcon = ImageProvider(R.drawable.launcher_battery_icon), title = "Battery Widget") },
+            backgroundColor = androidx.glance.unit.ColorProvider(Color.DarkGray)
         ) {
-            if (isWidgetSimpleUIManifest && batteryInfo.status == "No") {
-                Column(modifier = GlanceModifier
-                    .padding(8.dp)
+            Row(
+                modifier = GlanceModifier.fillMaxWidth().background(color = Color.DarkGray)
                     .clickable(actionStartActivity<MainActivity>()),
-                    horizontalAlignment = Alignment.CenterHorizontally) {
-                    Image(
-                        provider = ImageProvider(R.mipmap.ic_launcher_round),
-                        contentDescription = "Battery Icon",
-                        modifier = GlanceModifier.defaultWeight(),
-                        contentScale = ContentScale.Fit
-                    )
-                    Row {
-                        Text(
-                            text = "Battery Level ${batteryInfo.battery}%",
-                            style = textStyleBig,
-                            modifier = GlanceModifier.defaultWeight().padding(start = 16.dp, end = 16.dp)
-                        )
-                    }
-                    Row {
-                        Text(
-                            text = "Not Charging.",
-                            style = textStyleBig,
-                            modifier = GlanceModifier.defaultWeight()
-                        )
-                    }
-                }
-            }
-            else {
-                Column(
-                    modifier = GlanceModifier
-                        .padding(8.dp)
-                        .background(
-                            ImageProvider(R.drawable.launcher_battery_icon),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                if (isWidgetSimpleUIManifest && batteryInfo.status == "No") {
+                    Column(modifier = GlanceModifier
+                        .padding(8.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally) {
+                        Image(
+                            provider = ImageProvider(R.mipmap.ic_launcher_round),
+                            contentDescription = "Battery Icon",
+                            modifier = GlanceModifier.defaultWeight(),
                             contentScale = ContentScale.Fit
                         )
-                        .clickable(actionStartActivity<MainActivity>()),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    Text(
-                        text = "Battery Level: ${batteryInfo.battery}%",
-                        style = textStyleBig,
-                        modifier = GlanceModifier.defaultWeight()
-                    )
-                    Text(
-                        text = "Remaining Time: ${batteryInfo.remainingTime} min",
-                        style = textStyleBig,
-                        modifier = GlanceModifier.defaultWeight()
-                    )
-                    Text(
-                        text = "Current: ${batteryInfo.current} mA",
-                        style = textStyleBig,
-                        modifier = GlanceModifier.defaultWeight()
-                    )
-                    Text(
-                        text = "Is Charging?: ${batteryInfo.status}",
-                        style = textStyleBig,
-                        modifier = GlanceModifier.defaultWeight()
-                    )
-                    if (isUpdateTimesManifest) {
+                        Row {
+                            Text(
+                                text = "Battery Level ${batteryInfo.battery}%",
+                                style = textStyleBig,
+                                modifier = GlanceModifier.defaultWeight().padding(start = 16.dp, end = 16.dp)
+                            )
+                        }
+                        Row {
+                            Text(
+                                text = "Not Charging.",
+                                style = textStyleBig,
+                                modifier = GlanceModifier.defaultWeight()
+                            )
+                        }
+                        Row (modifier = GlanceModifier.fillMaxWidth().padding(top = 12.dp),
+                            verticalAlignment = Alignment.Bottom,
+                            horizontalAlignment = Alignment.CenterHorizontally){
+                            Image(
+                                provider = ImageProvider(android.R.drawable.ic_menu_rotate),
+                                contentDescription = "Refresh",
+                                modifier = GlanceModifier.clickable(actionRunCallback<RefreshAction>())
+                                    .defaultWeight()
+                            )
+                            Image(
+                                provider = ImageProvider(if (isRunning) android.R.drawable.ic_media_pause else android.R.drawable.ic_media_play),
+                                contentDescription = if (isRunning) "Stop" else "Start",
+                                modifier = GlanceModifier.clickable(actionRunCallback<ToggleAction>(
+                                    parameters = actionParametersOf(ActionParameters.Key<Boolean>("isRunning") to isRunning, ActionParameters.Key<Int>("alarmInterval") to alarmInterval)))
+                                    .defaultWeight()
+                            )
+                        }
+                    }
+                }
+                else {
+                    Column(
+                        modifier = GlanceModifier
+                            .padding(8.dp)
+                            .background(
+                                ImageProvider(R.drawable.launcher_battery_icon),
+                                contentScale = ContentScale.Fit
+                            )
+                            .clickable(actionStartActivity<MainActivity>()),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
                         Text(
-                            text = "Updated Times: $updatedTimes",
+                            text = "Battery Level: ${batteryInfo.battery}%",
                             style = textStyleBig,
                             modifier = GlanceModifier.defaultWeight()
                         )
+                        Text(
+                            text = "Remaining Time: ${batteryInfo.remainingTime} min",
+                            style = textStyleBig,
+                            modifier = GlanceModifier.defaultWeight()
+                        )
+                        Text(
+                            text = if(isMilliAmpere) "Current: ${batteryInfo.current} mA" else "Current: ${batteryInfo.current} μA",
+                            style = textStyleBig,
+                            modifier = GlanceModifier.defaultWeight()
+                        )
+                        Text(
+                            text = "Is Charging?: ${batteryInfo.status}",
+                            style = textStyleBig,
+                            modifier = GlanceModifier.defaultWeight()
+                        )
+                        if (isUpdateTimesManifest) {
+                            Text(
+                                text = "Updated Times: $updatedTimes",
+                                style = textStyleBig,
+                                modifier = GlanceModifier.defaultWeight()
+                            )
+                        }
+                        Text(
+                            text = "Last Updated Time: $time",
+                            style = textStyleSmall,
+                            modifier = GlanceModifier.defaultWeight()
+                        )
+                        Row (modifier = GlanceModifier.fillMaxWidth().padding(top = 12.dp),
+                            verticalAlignment = Alignment.Bottom,
+                            horizontalAlignment = Alignment.CenterHorizontally){
+                            Image(
+                                provider = ImageProvider(android.R.drawable.ic_menu_rotate),
+                                contentDescription = "Refresh",
+                                modifier = GlanceModifier.clickable(actionRunCallback<RefreshAction>())
+                                    .defaultWeight()
+                            )
+                            Image(
+                                provider = ImageProvider(if (isRunning) android.R.drawable.ic_media_pause else android.R.drawable.ic_media_play),
+                                contentDescription = if (isRunning) "Stop" else "Start",
+                                modifier = GlanceModifier.clickable(actionRunCallback<ToggleAction>(
+                                    parameters = actionParametersOf(ActionParameters.Key<Boolean>("isRunning") to isRunning, ActionParameters.Key<Int>("alarmInterval") to alarmInterval)))
+                                    .defaultWeight()
+                            )
+                        }
                     }
-                    Text(
-                        text = "Last Updated Time: $time",
-                        style = textStyleSmall,
-                        modifier = GlanceModifier.defaultWeight()
-                    )
                 }
-            }
-            Column(
-                modifier = GlanceModifier.fillMaxHeight().fillMaxWidth().background(color = Color.LightGray),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalAlignment = Alignment.End
-            ) {
-                Image(
-                    provider = ImageProvider(android.R.drawable.ic_menu_rotate),
-                    contentDescription = "Refresh",
-                    modifier = GlanceModifier.clickable(actionRunCallback<RefreshAction>())
-                        .defaultWeight()
-                )
-                Image(
-                    provider = ImageProvider(if (isRunning) android.R.drawable.ic_media_pause else android.R.drawable.ic_media_play),
-                    contentDescription = if (isRunning) "Stop" else "Start",
-                    modifier = GlanceModifier.clickable(actionRunCallback<ToggleAction>(
-                        parameters = actionParametersOf(ActionParameters.Key<Boolean>("isRunning") to isRunning, ActionParameters.Key<Int>("alarmInterval") to alarmInterval)))
-                        .defaultWeight()
-                )
             }
         }
     }
