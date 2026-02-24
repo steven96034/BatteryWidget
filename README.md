@@ -1,7 +1,10 @@
 # BatteryWidget 🔋
 
-[![Kotlin](https://img.shields.io/badge/Kotlin-1.9+-blue.svg)](https://kotlinlang.org)
-[![Android Minimum API](https://img.shields.io/badge/Minimum%20API-24-brightgreen.svg)](https://android-arsenal.com/api?level=24)
+[![Kotlin](https://img.shields.io/badge/Kotlin-1.8.10-purple?logo=kotlin)](https://kotlinlang.org)
+[![Android Minimum API](https://img.shields.io/badge/Minimum%20API-31-brightgreen.svg?logo=Android)](https://android-arsenal.com/api?level=24)
+![Jetpack Compose](https://img.shields.io/badge/UI-Jetpack_Compose-blue?logo=jetpackcompose)
+![Material 3](https://img.shields.io/badge/Material%203-Design-ea4335.svg?style=flat&logo=materialdesign)
+![License](https://img.shields.io/github/license/steven96034/BatteryWidget?color=blue)
 
 <p align="center">
   <img src="https://github.com/user-attachments/assets/dbe49d74-f245-4b64-90c9-c9a546982680" alt="Battery Widget Icon"/>
@@ -16,14 +19,17 @@ The main application is built with **MVVM Architecture** and **Jetpack Compose**
 | Main Dashboard | Settings |
 | :---: | :---: |
 | <img src="https://github.com/user-attachments/assets/8ac90852-6d9b-4af8-bbcd-27b727e8543c" alt="Main App UI" width="250"/> | <img src="https://github.com/user-attachments/assets/83e9a88c-2a95-4cca-a8d5-1309ff5a1d8e" alt="Settings UI" width="250"/> |
-| **Real-time Hardware Status**: Accurately fetches current battery level, voltage, temperature, and charging/discharging current. | **Highly Customizable**: Securely stores update frequency (Alarm Interval) and UI preferences using Jetpack DataStore. |
+* **Real-time Hardware Status**: Accurately fetches current status, power source, battery level, voltage, temperature, charging/discharging current, remaining time for charging, health condition, cycle count.
+* **Material Design 3 & Theming**: Fully supports **Dark/Light mode** adapting to system settings, and features a **Monochrome Adaptive Icon** for a seamless Android 13+ home screen experience.
+* **Modern Permission Handling**: Gracefully handles API 33+ runtime permissions for system notifications (Toasts) with clear user prompts.
+* **Highly Customizable**: Securely stores update frequency (Alarm Interval) and UI preferences using Jetpack DataStore.
 
 ## 🚀 Live Demos
 
 | Modern UI & Settings Navigation | Precise Background Scheduling & Real-time Updates |
 | :---: | :---: |
 | Smooth transitions and interactive experience built entirely with Jetpack Compose. | Integrates `AlarmManager` and `BroadcastReceiver`. The widget accurately reflects the latest status through periodic updates. |
-| <br> <video src="https://github.com/user-attachments/assets/9845d1b2-1e0c-4ffc-bfcb-67314b93c66a" width="250"></video> | <br> <video src="https://github.com/user-attachments/assets/026a2ecd-0fe0-432b-b0d5-490fc4c1655b" width="250"></video> |
+| <br> <video src="https://github.com/user-attachments/assets/9845d1b2-1e0c-4ffc-bfcb-67314b93c66a" width="100%"></video> | <br> <video src="https://github.com/user-attachments/assets/026a2ecd-0fe0-432b-b0d5-490fc4c1655b" width="100%"></video> |
 
 ## 🛠 Tech Stack
 
