@@ -56,4 +56,4 @@ The main application is built with **MVVM Architecture** and **Jetpack Compose**
 1. Ensure you have the latest version of Android Studio installed.
 2. Clone the repository: 
    ```bash
-   git clone [https://github.com/steven96034/BatteryWidget.git](https://github.com/steven96034/BatteryWidget.git)
+   git clone https://github.com/steven96034/BatteryWidget.git
